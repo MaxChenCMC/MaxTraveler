@@ -286,7 +286,7 @@
 
             <div class="list-section" style="margin-top: 1.5rem;">
                 <h3>國家代碼 (例如: tw, jp)</h3>
-                <input type="text" id="countryCodeInput" placeholder="輸入國家代碼" value="tw"
+                <input type="text" id="countryCodeInput" placeholder="輸入國家代碼" value="jp"
                     style="width: 100%; padding: 8px; margin-bottom: 1rem; border-radius: 4px;">
             </div>
 
@@ -361,7 +361,51 @@
                 locations = savedLocations ? JSON.parse(savedLocations) : [];
 
                 const savedGroups = localStorage.getItem('map-groups');
-                groups = savedGroups && JSON.parse(savedGroups).length > 0 ? JSON.parse(savedGroups) : ['美食', '自然風景', '咖啡廳', '旅遊景點'];
+                let loadedGroups = savedGroups ? JSON.parse(savedGroups) : [];
+
+                // Define default groups with icons and colors
+                const defaultGroups = [
+                    { name: '餐廳', icon: '🍴', color: '#FF6347' },
+                    { name: '自然風景', icon: '🌳', color: '#3CB371' },
+                    { name: '咖啡廳', icon: '☕', color: '#8B4513' },
+                    { name: '旅遊景點', icon: '🏛️', color: '#4682B4' }
+                ];
+
+                if (loadedGroups.length === 0) {
+                    groups = defaultGroups;
+                } else {
+                    // Check if loaded groups are old string format or new object format
+                    if (typeof loadedGroups[0] === 'string') {
+                        // Old string format, convert to new object format
+                        groups = loadedGroups.map(groupName => {
+                            const existingDefault = defaultGroups.find(g => g.name === groupName);
+                            return existingDefault || { name: groupName, icon: '📍', color: '#666666' };
+                        });
+                    } else {
+                        // New object format, ensure all properties are present
+                        groups = loadedGroups.map(group => ({
+                            ...group,
+                            icon: group.icon || '📍', // Default icon if missing
+                            color: group.color || '#666666' // Default color if missing
+                        }));
+                    }
+                }
+
+                // If after loading, groups are still empty, use default
+                if (groups.length === 0) {
+                    groups = defaultGroups;
+                }
+
+                // Ensure locations' group property matches the name of group objects
+                locations = locations.map(loc => {
+                    const correspondingGroup = groups.find(g => g.name === loc.group);
+                    if (!correspondingGroup) {
+                        // If a location's group doesn't exist in the current groups, assign a default or remove it
+                        // For now, let's assign it to the first default group or a generic group
+                        return { ...loc, group: groups[0] ? groups[0].name : '未分類' };
+                    }
+                    return loc;
+                });
             }
 
             // --- UI Rendering ---
@@ -381,22 +425,25 @@
                 }
 
                 groups.forEach(group => {
-                    const count = locations.filter(loc => loc.group === group).length;
+                    const count = locations.filter(loc => loc.group === group.name).length;
                     const groupEl = document.createElement('div');
                     groupEl.className = 'group-item';
                     groupEl.innerHTML = `
-                        <span>${group}</span>
+                        <div style="display: flex; align-items: center;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${group.color}; color: white; display: flex; justify-content: center; align-items: center; font-size: 14px; flex-shrink: 0;">${group.icon}</div>
+                            <span style="margin-left: 10px;">${group.name}</span>
+                        </div>
                         <div class="group-actions">
                             <span class="group-count">${count}</span>
-                            <span class="edit-group-btn" data-group-name="${group}">✏️</span>
-                            <span class="delete-group-btn" data-group-name="${group}">🗑️</span>
+                            <span class="edit-group-btn" data-group-name="${group.name}">✏️</span>
+                            <span class="delete-group-btn" data-group-name="${group.name}">🗑️</span>
                         </div>
                     `;
                     groupsContainer.appendChild(groupEl);
 
                     const optionEl = document.createElement('option');
-                    optionEl.value = group;
-                    optionEl.textContent = group;
+                    optionEl.value = group.name;
+                    optionEl.textContent = group.name;
                     groupSelect.appendChild(optionEl);
                 });
             }
@@ -445,7 +492,7 @@
 
             // --- Map Logic ---
             function initMap() {
-                map = L.map(mapContainer).setView([25.033, 121.565], 13);
+                map = L.map(mapContainer).setView([35.6812, 139.7595], 14);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '© OpenStreetMap contributors',
                     maxZoom: 19
@@ -457,8 +504,20 @@
                 markers = [];
 
                 locations.forEach(loc => {
-                    const marker = L.marker([loc.lat, loc.lon], { id: loc.id }).addTo(map);
-                    marker.bindPopup(`<b>${loc.name}</b>`);
+                    const group = groups.find(g => g.name === loc.group);
+                    const markerColor = group ? group.color : '#666666';
+                    const markerIcon = group ? group.icon : '📍';
+
+                    const customIcon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background-color: ${markerColor}; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 18px;">${markerIcon}</div>`,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15],
+                        popupAnchor: [0, -15]
+                    });
+
+                    const marker = L.marker([loc.lat, loc.lon], { icon: customIcon, id: loc.id }).addTo(map);
+                    marker.bindPopup(`<b>${loc.name}</b><br>${loc.address}<br>${loc.details || ''}`);
                     markers.push(marker);
                 });
             }
@@ -654,11 +713,14 @@
 
             function addNewGroup() {
                 const newGroup = prompt('請輸入新的群組名稱：');
-                if (newGroup && newGroup.trim() !== '' && !groups.includes(newGroup)) {
-                    groups.push(newGroup.trim());
+                if (newGroup && newGroup.trim() !== '' && !groups.some(g => g.name === newGroup.trim())) {
+                    // Assign a default icon and color for new groups
+                    const defaultIcon = '📍'; // You can expand this to allow user selection later
+                    const defaultColor = '#666666'; // A neutral default color
+                    groups.push({ name: newGroup.trim(), icon: defaultIcon, color: defaultColor });
                     saveData();
                     renderUI();
-                } else if (groups.includes(newGroup)) {
+                } else if (groups.some(g => g.name === newGroup.trim())) {
                     alert('該群組名稱已存在！');
                 }
             }
@@ -669,7 +731,7 @@
                 if (!newGroupName || newGroupName.trim() === '' || newGroupName.trim() === oldGroupName) {
                     return; // User cancelled or entered same/empty name
                 }
-                if (groups.includes(newGroupName.trim())) {
+                if (groups.some(g => g.name === newGroupName.trim())) {
                     alert('該群組名稱已存在！');
                     return;
                 }
@@ -677,9 +739,9 @@
                 const finalNewName = newGroupName.trim();
 
                 // Update group name in the groups array
-                const groupIndex = groups.indexOf(oldGroupName);
+                const groupIndex = groups.findIndex(g => g.name === oldGroupName);
                 if (groupIndex > -1) {
-                    groups[groupIndex] = finalNewName;
+                    groups[groupIndex].name = finalNewName;
                 }
 
                 // Update group name for all associated locations
@@ -702,7 +764,7 @@
                 }
 
                 if (confirm(`確定要刪除群組 "${groupName}" 嗎？`)) {
-                    groups = groups.filter(g => g !== groupName);
+                    groups = groups.filter(g => g.name !== groupName);
                     saveData();
                     renderUI();
                     showStatus('群組已刪除', 'success');
