@@ -4,9 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>地址定位地圖</title>
+    <title>我的地圖收藏</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <style>
+        :root {
+            --primary-color: #4285f4;
+            --primary-hover: #3367d6;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #666;
+            --white: #fff;
+            --danger-color: #dc3545;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,179 +24,692 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             height: 100vh;
             display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        #sidebar {
+            width: 320px;
+            height: 100%;
+            background: var(--white);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
             flex-direction: column;
+            z-index: 1000;
         }
 
-        .search-container {
-            padding: 15px;
-            background: #f5f5f5;
-            border-bottom: 2px solid #ddd;
+        .sidebar-header {
+            padding: 1.25rem;
+            background: var(--primary-color);
+            color: var(--white);
         }
 
-        .search-box {
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            color: var(--white);
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Add Location Form */
+        #add-form {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        #add-form h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        #add-form input,
+        #add-form select,
+        #add-form textarea {
+            /* Added textarea */
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #add-form textarea {
+            min-height: 80px;
+            /* Added min-height for textarea */
+            resize: vertical;
+            /* Allow vertical resizing */
+        }
+
+        .form-buttons {
             display: flex;
             gap: 10px;
-            max-width: 800px;
-            margin: 0 auto;
         }
 
-        #addressInput {
+        .form-buttons button {
             flex: 1;
-            padding: 10px 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
+            padding: 10px;
             border-radius: 4px;
-        }
-
-        #searchBtn {
-            padding: 10px 30px;
-            font-size: 16px;
-            background: #4285f4;
-            color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
         }
 
-        #searchBtn:hover {
-            background: #3367d6;
+        #saveBtn {
+            background: #28a745;
+            color: var(--white);
         }
 
-        #searchBtn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        #cancelBtn {
+            background: #6c757d;
+            color: var(--white);
         }
 
-        #map {
-            flex: 1;
+        /* Lists */
+        .list-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .status {
-            padding: 8px 15px;
+        .add-group-btn {
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .group-item,
+        .location-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
+        }
+
+        .group-item {
+            cursor: default;
+        }
+
+        .location-item {
+            cursor: pointer;
+        }
+
+        .group-item:hover,
+        .location-item:hover {
+            background: var(--light-gray);
+        }
+
+        .location-item.active {
+            background: #e0eafc;
+        }
+
+        .location-info h4 {
+            font-weight: 600;
+        }
+
+        .location-info p {
+            font-size: 0.8rem;
+            color: var(--dark-gray);
+        }
+
+        .location-actions,
+        .group-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .edit-btn,
+        .delete-btn,
+        .edit-group-btn,
+        .delete-group-btn {
+            visibility: hidden;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .location-item:hover .edit-btn,
+        .location-item:hover .delete-btn,
+        .group-item:hover .edit-group-btn,
+        .group-item:hover .delete-group-btn {
+            visibility: visible;
+        }
+
+        .delete-btn,
+        .delete-group-btn {
+            color: var(--danger-color);
+        }
+
+        .group-count {
+            background: var(--medium-gray);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .empty-placeholder {
             text-align: center;
-            font-size: 14px;
-            color: #666;
+            color: var(--dark-gray);
+            margin-top: 1rem;
+            font-size: 0.9rem;
         }
 
-        .error {
-            background: #ffebee;
+        /* --- Map --- */
+        #map-container {
+            flex: 1;
+            height: 100%;
+        }
+
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            font-size: 14px;
+            display: none;
+        }
+
+        #status.error {
             color: #c62828;
         }
 
-        .success {
-            background: #e8f5e9;
+        #status.success {
             color: #2e7d32;
         }
     </style>
 </head>
 
 <body>
-    <div class="search-container">
-        <div class="search-box">
-            <input type="text" id="addressInput" placeholder="輸入地址，例如：台北101、巴黎聖母院、Tokyo Tower" />
-            <button id="searchBtn">搜尋</button>
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h1>旅遊攻略</h1>
+            <p id="location-count">已收藏 0 個地點</p>
         </div>
-        <div id="status" class="status"></div>
+
+        <div class="sidebar-content">
+            <div class="list-section">
+                <h3>
+                    <span>群組</span>
+                    <span id="add-group-btn" class="add-group-btn">+ 新增群組</span>
+                </h3>
+                <div id="groups-container"></div>
+            </div>
+
+            <button id="show-form-btn" class="btn">新增地點</button>
+
+            <div id="add-form" style="display: none;">
+                <h3>新增地點</h3>
+                <input type="text" id="nameInput" placeholder="地點名稱 (可選)">
+                <input type="text" id="addressInput" placeholder="輸入地址，例如：台北101" required>
+                <select id="groupSelect"></select>
+                <textarea id="detailsInput" placeholder="地點細節 (最多256字)" maxlength="256"></textarea>
+                <div class="form-buttons">
+                    <button id="saveBtn">儲存</button>
+                    <button id="cancelBtn">取消</button>
+                </div>
+            </div>
+
+            <div class="list-section" style="margin-top: 1.5rem;">
+                <h3>所有地點</h3>
+                <div id="locations-container"></div>
+            </div>
+        </div>
     </div>
-    <div id="map"></div>
+
+    <div id="map-container"></div>
+    <div id="status"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
-        // 初始化地圖（預設台北）
-        const map = L.map('map').setView([25.033, 121.565], 13);
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const mapContainer = document.getElementById('map-container');
+            const statusDiv = document.getElementById('status');
+            const showFormBtn = document.getElementById('show-form-btn');
+            const addForm = document.getElementById('add-form');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const nameInput = document.getElementById('nameInput');
+            const addressInput = document.getElementById('addressInput');
+            const groupSelect = document.getElementById('groupSelect');
+            const detailsInput = document.getElementById('detailsInput'); // New: Details Input
+            const addGroupBtn = document.getElementById('add-group-btn');
+            const locationCountEl = document.getElementById('location-count');
+            const groupsContainer = document.getElementById('groups-container');
+            const locationsContainer = document.getElementById('locations-container');
+            const formTitle = addForm.querySelector('h3');
 
-        // 載入 OpenStreetMap 圖層
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19
-        }).addTo(map);
+            // --- App State ---
+            let map;
+            let locations = [];
+            let groups = [];
+            let markers = [];
+            let activeLocationId = null;
+            let editingLocationId = null;
 
-        let currentMarker = null;
-        const statusDiv = document.getElementById('status');
-        const searchBtn = document.getElementById('searchBtn');
-        const addressInput = document.getElementById('addressInput');
+            // --- Data Persistence ---
+            function saveData() {
+                localStorage.setItem('map-locations', JSON.stringify(locations));
+                localStorage.setItem('map-groups', JSON.stringify(groups));
+            }
 
-        // 顯示狀態訊息
-        function showStatus(message, type = '') {
-            statusDiv.textContent = message;
-            statusDiv.className = 'status ' + type;
-            if (type) {
+            function loadData() {
+                const savedLocations = localStorage.getItem('map-locations');
+                locations = savedLocations ? JSON.parse(savedLocations) : [];
+
+                const savedGroups = localStorage.getItem('map-groups');
+                groups = savedGroups && JSON.parse(savedGroups).length > 0 ? JSON.parse(savedGroups) : ['美食', '自然風景', '咖啡廳', '旅遊景點'];
+            }
+
+            // --- UI Rendering ---
+            function renderUI() {
+                renderGroups();
+                renderLocations();
+                renderMapMarkers();
+                updateLocationCount();
+            }
+
+            function renderGroups() {
+                groupsContainer.innerHTML = '';
+                groupSelect.innerHTML = '';
+
+                if (groups.length === 0) {
+                    groupsContainer.innerHTML = '<p class="empty-placeholder">尚無群組</p>';
+                }
+
+                groups.forEach(group => {
+                    const count = locations.filter(loc => loc.group === group).length;
+                    const groupEl = document.createElement('div');
+                    groupEl.className = 'group-item';
+                    groupEl.innerHTML = `
+                        <span>${group}</span>
+                        <div class="group-actions">
+                            <span class="group-count">${count}</span>
+                            <span class="edit-group-btn" data-group-name="${group}">✏️</span>
+                            <span class="delete-group-btn" data-group-name="${group}">🗑️</span>
+                        </div>
+                    `;
+                    groupsContainer.appendChild(groupEl);
+
+                    const optionEl = document.createElement('option');
+                    optionEl.value = group;
+                    optionEl.textContent = group;
+                    groupSelect.appendChild(optionEl);
+                });
+            }
+
+            function renderLocations() {
+                locationsContainer.innerHTML = '';
+                if (locations.length === 0) {
+                    locationsContainer.innerHTML = '<p class="empty-placeholder">尚無地點，點擊上方按鈕新增</p>';
+                    return;
+                }
+
+                locations.forEach(loc => {
+                    const locEl = document.createElement('div');
+                    locEl.className = 'location-item';
+                    locEl.dataset.id = loc.id;
+                    if (loc.id === activeLocationId) {
+                        locEl.classList.add('active');
+                    }
+
+                    locEl.innerHTML = `
+                        <div class="location-info">
+                            <h4>${loc.name}</h4>
+                            <p>${loc.address}</p>
+                        </div>
+                        <div class="location-actions">
+                            <span class="edit-btn" data-id="${loc.id}">✏️</span>
+                            <span class="delete-btn" data-id="${loc.id}">✕</span>
+                        </div>
+                    `;
+
+                    locEl.querySelector('.location-info').addEventListener('click', () => {
+                        map.setView([loc.lat, loc.lon], 16);
+                        const marker = markers.find(m => m.options.id === loc.id);
+                        if (marker) marker.openPopup();
+                        activeLocationId = loc.id;
+                        renderLocations();
+                    });
+
+                    locationsContainer.appendChild(locEl);
+                });
+            }
+
+            function updateLocationCount() {
+                locationCountEl.textContent = `已收藏 ${locations.length} 個地點`;
+            }
+
+            // --- Map Logic ---
+            function initMap() {
+                map = L.map(mapContainer).setView([25.033, 121.565], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+            }
+
+            function renderMapMarkers() {
+                markers.forEach(marker => map.removeLayer(marker));
+                markers = [];
+
+                locations.forEach(loc => {
+                    const marker = L.marker([loc.lat, loc.lon], { id: loc.id }).addTo(map);
+                    marker.bindPopup(`<b>${loc.name}</b>`);
+                    markers.push(marker);
+                });
+            }
+
+            // --- Form & State Management ---
+            function resetFormState() {
+                editingLocationId = null;
+                addForm.style.display = 'none';
+                showFormBtn.style.display = 'block';
+
+                formTitle.textContent = '新增地點';
+                saveBtn.textContent = '儲存';
+
+                nameInput.value = '';
+                addressInput.value = '';
+                addressInput.disabled = false;
+                detailsInput.value = ''; // New: Clear details input
+            }
+
+            function startEdit(id) {
+                const locToEdit = locations.find(loc => loc.id === id);
+                if (!locToEdit) return;
+
+                editingLocationId = id;
+
+                addForm.style.display = 'block';
+                showFormBtn.style.display = 'none';
+
+                formTitle.textContent = '編輯地點';
+                saveBtn.textContent = '更新';
+
+                nameInput.value = locToEdit.name;
+                addressInput.value = locToEdit.address;
+                addressInput.disabled = false; // Enable address editing
+                groupSelect.value = locToEdit.group;
+                detailsInput.value = locToEdit.details || ''; // New: Populate details input
+            }
+
+            // --- Core Functionality ---
+            async function handleSave() {
+                if (editingLocationId !== null) {
+                    await updateLocation(editingLocationId);
+                } else {
+                    await searchAndAddLocation();
+                }
+            }
+
+            async function updateLocation(id) {
+                const locIndex = locations.findIndex(loc => loc.id === id);
+                if (locIndex === -1) return;
+
+                const originalLocation = locations[locIndex];
+                const newAddress = addressInput.value.trim();
+                const newName = nameInput.value.trim();
+                const newGroup = groupSelect.value;
+                const newDetails = detailsInput.value.trim(); // New: Get details
+
+                // If address hasn't changed, simple update and exit
+                if (newAddress === originalLocation.address) {
+                    locations[locIndex].name = newName || '未命名地點';
+                    locations[locIndex].group = newGroup;
+                    locations[locIndex].details = newDetails; // New: Update details
+                    saveData();
+                    renderUI();
+                    resetFormState();
+                    showStatus('✓ 地點已更新', 'success');
+                    return;
+                }
+
+                // Address has changed, perform re-geocoding
+                saveBtn.disabled = true;
+                showStatus('地址已變更，重新搜尋座標...');
+
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(newAddress)}&limit=1&accept-language=zh-TW,zh`
+                    );
+                    const data = await response.json();
+
+                    if (data.length > 0) {
+                        const result = data[0];
+                        locations[locIndex].name = newName || result.display_name.split(',')[0];
+                        locations[locIndex].address = result.display_name;
+                        locations[locIndex].lat = parseFloat(result.lat);
+                        locations[locIndex].lon = parseFloat(result.lon);
+                        locations[locIndex].group = newGroup;
+                        locations[locIndex].details = newDetails; // New: Update details
+
+                        saveData();
+                        renderUI();
+                        resetFormState();
+                        map.setView([locations[locIndex].lat, locations[locIndex].lon], 15);
+                        showStatus('✓ 地點已成功更新座標', 'success');
+                    } else {
+                        showStatus('❌ 找不到新的地址，地點未更新', 'error');
+                    }
+                } catch (error) {
+                    showStatus('❌ 搜尋失敗，地點未更新', 'error');
+                    console.error('Update geocoding error:', error);
+                } finally {
+                    saveBtn.disabled = false;
+                }
+            }
+
+            async function searchAndAddLocation() {
+                const address = addressInput.value.trim();
+                if (!address) {
+                    showStatus('請輸入地址', 'error');
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                showStatus('搜尋中...');
+
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&accept-language=zh-TW,zh`
+                    );
+                    const data = await response.json();
+
+                    if (data.length > 0) {
+                        const result = data[0];
+                        const newLocation = {
+                            id: Date.now(),
+                            name: nameInput.value.trim() || result.display_name.split(',')[0],
+                            address: result.display_name,
+                            lat: parseFloat(result.lat),
+                            lon: parseFloat(result.lon),
+                            group: groupSelect.value,
+                            details: detailsInput.value.trim() // New: Add details
+                        };
+
+                        locations.unshift(newLocation);
+                        saveData();
+                        renderUI();
+
+                        map.setView([newLocation.lat, newLocation.lon], 15);
+                        showStatus('✓ 地點已新增', 'success');
+                        resetFormState();
+
+                    } else {
+                        showStatus('❌ 找不到地址', 'error');
+                    }
+                } catch (error) {
+                    showStatus('❌ 搜尋失敗，請檢查網路', 'error');
+                    console.error('Search error:', error);
+                } finally {
+                    saveBtn.disabled = false;
+                }
+            }
+
+            function deleteLocation(id) {
+                if (confirm('確定要刪除此地點嗎？')) {
+                    locations = locations.filter(loc => loc.id !== id);
+                    if (activeLocationId === id) activeLocationId = null;
+                    if (editingLocationId === id) resetFormState();
+
+                    saveData();
+                    renderUI();
+                    showStatus('地點已刪除', 'success');
+                }
+            }
+
+            function addNewGroup() {
+                const newGroup = prompt('請輸入新的群組名稱：');
+                if (newGroup && newGroup.trim() !== '' && !groups.includes(newGroup)) {
+                    groups.push(newGroup.trim());
+                    saveData();
+                    renderUI();
+                } else if (groups.includes(newGroup)) {
+                    alert('該群組名稱已存在！');
+                }
+            }
+
+            function startEditGroup(oldGroupName) {
+                const newGroupName = prompt('請輸入新的群組名稱：', oldGroupName);
+
+                if (!newGroupName || newGroupName.trim() === '' || newGroupName.trim() === oldGroupName) {
+                    return; // User cancelled or entered same/empty name
+                }
+                if (groups.includes(newGroupName.trim())) {
+                    alert('該群組名稱已存在！');
+                    return;
+                }
+
+                const finalNewName = newGroupName.trim();
+
+                // Update group name in the groups array
+                const groupIndex = groups.indexOf(oldGroupName);
+                if (groupIndex > -1) {
+                    groups[groupIndex] = finalNewName;
+                }
+
+                // Update group name for all associated locations
+                locations.forEach(loc => {
+                    if (loc.group === oldGroupName) {
+                        loc.group = finalNewName;
+                    }
+                });
+
+                saveData();
+                renderUI();
+                showStatus('✓ 群組已更新', 'success');
+            }
+
+            function deleteGroup(groupName) {
+                const isGroupInUse = locations.some(loc => loc.group === groupName);
+                if (isGroupInUse) {
+                    alert(`無法刪除群組 "${groupName}"，因為裡面還有地點。\n請先將地點移至其他群組後再試。`);
+                    return;
+                }
+
+                if (confirm(`確定要刪除群組 "${groupName}" 嗎？`)) {
+                    groups = groups.filter(g => g !== groupName);
+                    saveData();
+                    renderUI();
+                    showStatus('群組已刪除', 'success');
+                }
+            }
+
+            function showStatus(message, type = '') {
+                statusDiv.textContent = message;
+                statusDiv.className = type;
+                statusDiv.style.display = 'block';
                 setTimeout(() => {
-                    statusDiv.className = 'status';
-                    statusDiv.textContent = '';
+                    statusDiv.style.display = 'none';
                 }, 3000);
             }
-        }
 
-        // 使用 Nominatim API 搜尋地址
-        async function searchAddress(address) {
-            searchBtn.disabled = true;
-            showStatus('搜尋中...');
+            // --- Event Listeners ---
+            showFormBtn.addEventListener('click', () => {
+                resetFormState();
+                addForm.style.display = 'block';
+                showFormBtn.style.display = 'none';
+                addressInput.focus();
+            });
 
-            try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
-                    {
-                        headers: {
-                            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8'
-                        }
-                    }
-                );
+            cancelBtn.addEventListener('click', resetFormState);
+            saveBtn.addEventListener('click', handleSave);
+            addGroupBtn.addEventListener('click', addNewGroup);
 
-                const data = await response.json();
-
-                if (data.length > 0) {
-                    const result = data[0];
-                    const lat = parseFloat(result.lat);
-                    const lon = parseFloat(result.lon);
-
-                    // 移除舊標記
-                    if (currentMarker) {
-                        map.removeLayer(currentMarker);
-                    }
-
-                    // 新增標記
-                    currentMarker = L.marker([lat, lon]).addTo(map);
-                    currentMarker.bindPopup(`<b>${result.display_name}</b>`).openPopup();
-
-                    // 移動地圖視角
-                    map.setView([lat, lon], 15);
-
-                    showStatus(`✓ 找到：${result.display_name}`, 'success');
-                } else {
-                    showStatus('❌ 找不到這個地址，請試試更具體的描述', 'error');
+            locationsContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                if (target.classList.contains('delete-btn')) {
+                    const id = parseInt(target.dataset.id, 10);
+                    deleteLocation(id);
+                } else if (target.classList.contains('edit-btn')) {
+                    const id = parseInt(target.dataset.id, 10);
+                    startEdit(id);
                 }
-            } catch (error) {
-                showStatus('❌ 搜尋失敗，請檢查網路連線', 'error');
-                console.error('搜尋錯誤:', error);
-            } finally {
-                searchBtn.disabled = false;
-            }
-        }
+            });
 
-        // 搜尋按鈕事件
-        searchBtn.addEventListener('click', () => {
-            const address = addressInput.value.trim();
-            if (address) {
-                searchAddress(address);
-            }
-        });
+            groupsContainer.addEventListener('click', (e) => {
+                const target = e.target;
+                const groupName = target.dataset.groupName;
+                if (!groupName) return;
 
-        // Enter 鍵搜尋
-        addressInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const address = addressInput.value.trim();
-                if (address) {
-                    searchAddress(address);
+                if (target.classList.contains('edit-group-btn')) {
+                    startEditGroup(groupName);
+                } else if (target.classList.contains('delete-group-btn')) {
+                    deleteGroup(groupName);
                 }
-            }
-        });
+            });
 
-        // 初始提示
-        showStatus('請輸入地址開始搜尋');
+            // --- Initialization ---
+            loadData();
+            initMap();
+            renderUI();
+        });
     </script>
 </body>
 
