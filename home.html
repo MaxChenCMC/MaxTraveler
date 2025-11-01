@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的地圖收藏</title>
+    <title>怎麼又出國</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <style>
         :root {
@@ -46,20 +46,14 @@
             background: var(--primary-color);
             color: var(--white);
             display: flex;
-            /* Make sidebar-header a flex container */
             flex-direction: column;
-            /* Stack its children vertically */
             gap: 0.5rem;
-            /* Add some space between children */
         }
 
         .sidebar-header-top {
             display: flex;
-            /* Make this a flex container for h1 and input */
             align-items: center;
-            /* Vertically align items */
             justify-content: space-between;
-            /* Push h1 and input to ends */
         }
 
         .sidebar-header h1 {
@@ -199,47 +193,24 @@
         }
 
         .location-info {
-
             display: flex;
-
             align-items: flex-start;
-
             gap: 1rem;
-
             width: 100%;
-            /* Ensure it fills the container */
-
         }
-
-
 
         .location-info h4 {
-
             font-weight: 600;
-
             flex: 1;
-            /* Let the name take up the available space */
-
             overflow-wrap: break-word;
-
         }
 
-
-
         .location-info p {
-
             font-size: 0.8rem;
-
             color: var(--dark-gray);
-
             flex-basis: 40%;
-            /* Assign a fixed basis for details */
-
             flex-shrink: 0;
-            /* Prevent it from shrinking */
-
             overflow-wrap: break-word;
-
         }
 
         .location-actions,
@@ -338,8 +309,6 @@
 
             <button id="show-form-btn" class="btn">新增地點</button>
 
-
-
             <div id="add-form" style="display: none;">
                 <h3>新增地點</h3>
                 <input type="text" id="nameInput" placeholder="地點名稱 (可選)">
@@ -375,7 +344,7 @@
             const nameInput = document.getElementById('nameInput');
             const addressInput = document.getElementById('addressInput');
             const groupSelect = document.getElementById('groupSelect');
-            const detailsInput = document.getElementById('detailsInput'); // New: Details Input
+            const detailsInput = document.getElementById('detailsInput');
             const addGroupBtn = document.getElementById('add-group-btn');
             const locationCountEl = document.getElementById('location-count');
             const groupsContainer = document.getElementById('groups-container');
@@ -415,11 +384,11 @@
 
                 // Define default groups with icons and colors
                 const defaultGroups = [
-                    { name: '餐廳', icon: '🍽️', color: '#FF6347' },
-                    { name: '屋台小吃', icon: '🍡', color: '#3CB371' },
-                    { name: 'vibe景點', icon: '⛩️', color: '#8B4513' },
-                    { name: '建築', icon: '🏛️', color: '#8B4513' },
-                    { name: '購物', icon: '🔖', color: '#4682B4' }
+                    { name: '餐廳', icon: '🍣' },
+                    { name: '屋台小吃', icon: '🍡' },
+                    { name: 'vibe景點', icon: '⛩️' },
+                    { name: '建築', icon: '🏛️' },
+                    { name: '購物', icon: '🔖' }
                 ];
 
                 if (loadedGroups.length === 0) {
@@ -430,14 +399,13 @@
                         // Old string format, convert to new object format
                         groups = loadedGroups.map(groupName => {
                             const existingDefault = defaultGroups.find(g => g.name === groupName);
-                            return existingDefault || { name: groupName, icon: '📍', color: '#666666' };
+                            return existingDefault || { name: groupName, icon: '📍' };
                         });
                     } else {
                         // New object format, ensure all properties are present
                         groups = loadedGroups.map(group => ({
                             ...group,
-                            icon: group.icon || '📍', // Default icon if missing
-                            color: group.color || '#666666' // Default color if missing
+                            icon: group.icon || '📍' // Default icon if missing
                         }));
                     }
                 }
@@ -558,7 +526,6 @@
 
                 locations.forEach(loc => {
                     const group = groups.find(g => g.name === loc.group);
-                    const markerColor = group ? group.color : '#666666';
                     const markerIcon = group ? group.icon : '📍';
 
                     const customIcon = L.divIcon({
@@ -572,7 +539,7 @@
                     const marker = L.marker([loc.lat, loc.lon], {
                         icon: customIcon,
                         id: loc.id,
-                        draggable: false // Initially not draggable
+                        draggable: false
                     }).addTo(map);
 
                     let dragTimer;
@@ -613,7 +580,7 @@
                 nameInput.value = '';
                 addressInput.value = '';
                 addressInput.disabled = false;
-                detailsInput.value = ''; // New: Clear details input
+                detailsInput.value = '';
             }
 
             function startEdit(id) {
@@ -632,7 +599,7 @@
                 addressInput.value = locToEdit.address;
                 addressInput.disabled = false; // Enable address editing
                 groupSelect.value = locToEdit.group;
-                detailsInput.value = locToEdit.details || ''; // New: Populate details input
+                detailsInput.value = locToEdit.details || '';
             }
 
             // --- Core Functionality ---
@@ -685,13 +652,13 @@
                 const newAddress = addressInput.value.trim();
                 const newName = nameInput.value.trim();
                 const newGroup = groupSelect.value;
-                const newDetails = detailsInput.value.trim(); // New: Get details
+                const newDetails = detailsInput.value.trim();
 
                 // If address hasn't changed, simple update and exit
                 if (newAddress === originalLocation.address) {
                     locations[locIndex].name = newName || '未命名地點';
                     locations[locIndex].group = newGroup;
-                    locations[locIndex].details = newDetails; // New: Update details
+                    locations[locIndex].details = newDetails;
                     saveData();
                     renderUI();
                     resetFormState();
@@ -732,7 +699,7 @@
                         locations[locIndex].lat = parseFloat(result.lat);
                         locations[locIndex].lon = parseFloat(result.lon);
                         locations[locIndex].group = newGroup;
-                        locations[locIndex].details = newDetails; // New: Update details
+                        locations[locIndex].details = newDetails;
 
                         saveData();
                         renderUI();
@@ -789,7 +756,7 @@
                             lat: parseFloat(result.lat),
                             lon: parseFloat(result.lon),
                             group: groupSelect.value,
-                            details: detailsInput.value.trim() // New: Add details
+                            details: detailsInput.value.trim()
                         };
 
                         locations.unshift(newLocation);
@@ -826,10 +793,9 @@
             function addNewGroup() {
                 const newGroup = prompt('請輸入新的群組名稱：');
                 if (newGroup && newGroup.trim() !== '' && !groups.some(g => g.name === newGroup.trim())) {
-                    // Assign a default icon and color for new groups
+                    // Assign a default icon for new groups
                     const defaultIcon = '📍'; // You can expand this to allow user selection later
-                    const defaultColor = '#666666'; // A neutral default color
-                    groups.push({ name: newGroup.trim(), icon: defaultIcon, color: defaultColor });
+                    groups.push({ name: newGroup.trim(), icon: defaultIcon });
                     saveData();
                     renderUI();
                 } else if (groups.some(g => g.name === newGroup.trim())) {
