@@ -298,9 +298,9 @@
             left: 50%;
             transform: translateX(-50%);
             /* Center horizontally */
-            width: 1000px;
+            width: 600px;
             /* 70vw at 1920px */
-            height: 500px;
+            height: 300px;
             /* 50vh at 1080px */
             background-color: transparent;
             /* No black background */
@@ -310,7 +310,8 @@
             align-items: center;
             overflow: hidden;
             border-radius: 8px;
-            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.4), 0 12px 40px 0 rgba(0, 0, 0, 0.38);
+            /* 移除此陰影以避免與圖片自身的陰影重疊，造成雙重邊框效果 */
+            /* box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.4), 0 12px 40px 0 rgba(0, 0, 0, 0.38); */
             /* More prominent shadow */
         }
 
