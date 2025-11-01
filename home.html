@@ -280,13 +280,15 @@
                 <div id="groups-container"></div>
             </div>
 
-            <div class="list-section" style="margin-top: 1.5rem;">
-                <h3>地理編碼區域</h3>
-                <select id="geocodingRegionSelect"
-                    style="width: 100%; padding: 8px; margin-bottom: 1rem; border-radius: 4px;"></select>
-            </div>
+
 
             <button id="show-form-btn" class="btn">新增地點</button>
+
+            <div class="list-section" style="margin-top: 1.5rem;">
+                <h3>國家代碼 (例如: tw, jp)</h3>
+                <input type="text" id="countryCodeInput" placeholder="輸入國家代碼" value="tw"
+                    style="width: 100%; padding: 8px; margin-bottom: 1rem; border-radius: 4px;">
+            </div>
 
             <div id="add-form" style="display: none;">
                 <h3>新增地點</h3>
@@ -329,6 +331,7 @@
             const groupsContainer = document.getElementById('groups-container');
             const locationsContainer = document.getElementById('locations-container');
             const formTitle = addForm.querySelector('h3');
+            const countryCodeInput = document.getElementById('countryCodeInput');
 
             // --- App State ---
             let map;
@@ -529,9 +532,25 @@
                 saveBtn.disabled = true;
                 showStatus('地址已變更，重新搜尋座標...');
 
+                const currentCenter = map.getCenter();
+                const currentBounds = map.getBounds();
+                const latDiff = currentBounds.getNorth() - currentBounds.getSouth();
+                const lonDiff = currentBounds.getEast() - currentBounds.getWest();
+
+                const expandedLatDiff = latDiff * 10;
+                const expandedLonDiff = lonDiff * 10;
+
+                const minLat = currentCenter.lat - expandedLatDiff / 2;
+                const maxLat = currentCenter.lat + expandedLatDiff / 2;
+                const minLon = currentCenter.lng - expandedLonDiff / 2;
+                const maxLon = currentCenter.lng + expandedLonDiff / 2;
+
+                const viewbox = `${minLon},${minLat},${maxLon},${maxLat}`;
+                const countrycodes = countryCodeInput.value.trim();
+
                 try {
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(newAddress))}&limit=1&viewbox=120.0,21.5,122.0,26.0&bounded=1&countrycodes=tw`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(newAddress))}&limit=1&viewbox=${viewbox}&bounded=1&countrycodes=${countrycodes}`
                     );
                     const data = await response.json();
 
@@ -568,11 +587,25 @@
                 }
 
                 saveBtn.disabled = true;
-                showStatus('搜尋中...');
+                const currentCenter = map.getCenter();
+                const currentBounds = map.getBounds();
+                const latDiff = currentBounds.getNorth() - currentBounds.getSouth();
+                const lonDiff = currentBounds.getEast() - currentBounds.getWest();
+
+                const expandedLatDiff = latDiff * 10;
+                const expandedLonDiff = lonDiff * 10;
+
+                const minLat = currentCenter.lat - expandedLatDiff / 2;
+                const maxLat = currentCenter.lat + expandedLatDiff / 2;
+                const minLon = currentCenter.lng - expandedLonDiff / 2;
+                const maxLon = currentCenter.lng + expandedLonDiff / 2;
+
+                const viewbox = `${minLon},${minLat},${maxLon},${maxLat}`;
+                const countrycodes = countryCodeInput.value.trim();
 
                 try {
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(address))}&limit=1&viewbox=120.0,21.5,122.0,26.0&bounded=1&countrycodes=tw`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(address))}&limit=1&viewbox=${viewbox}&bounded=1&countrycodes=${countrycodes}`
                     );
                     const data = await response.json();
 
