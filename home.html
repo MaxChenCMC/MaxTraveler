@@ -280,6 +280,12 @@
                 <div id="groups-container"></div>
             </div>
 
+            <div class="list-section" style="margin-top: 1.5rem;">
+                <h3>地理編碼區域</h3>
+                <select id="geocodingRegionSelect"
+                    style="width: 100%; padding: 8px; margin-bottom: 1rem; border-radius: 4px;"></select>
+            </div>
+
             <button id="show-form-btn" class="btn">新增地點</button>
 
             <div id="add-form" style="display: none;">
@@ -331,6 +337,15 @@
             let markers = [];
             let activeLocationId = null;
             let editingLocationId = null;
+
+            // --- Utility Functions ---
+            function cleanAddress(address) {
+                // Remove content within parentheses
+                let cleaned = address.replace(/\([^)]*\)/g, '').trim();
+                // Remove extra spaces
+                cleaned = cleaned.replace(/\s\s+/g, ' ');
+                return cleaned;
+            }
 
             // --- Data Persistence ---
             function saveData() {
@@ -516,7 +531,7 @@
 
                 try {
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(newAddress)}&limit=1&accept-language=zh-TW,zh`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(newAddress))}&limit=1&viewbox=120.0,21.5,122.0,26.0&bounded=1&countrycodes=tw`
                     );
                     const data = await response.json();
 
@@ -557,7 +572,7 @@
 
                 try {
                     const response = await fetch(
-                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&accept-language=zh-TW,zh`
+                        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cleanAddress(address))}&limit=1&viewbox=120.0,21.5,122.0,26.0&bounded=1&countrycodes=tw`
                     );
                     const data = await response.json();
 
