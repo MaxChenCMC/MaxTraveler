@@ -1,4 +1,4 @@
 # Tasks To-Do
 
-- [x] **Modify `C:\Users\just_\Desktop\workspace\MaxTraveler\home.html`**
-  - Update the `defaultGroups` array to change the '美食' group to '餐廳' and its icon to '🍴'.
+- [x] **Modify `C:\Users\just_\\Desktop\workspace\MaxTraveler\home.html`**
+  - Once again, rework the CSS for `.location-info` and its children. The new implementation will use a more robust flexbox configuration to prevent elements from overlapping and ensure the details text wraps correctly.

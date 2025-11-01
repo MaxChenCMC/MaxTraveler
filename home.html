@@ -45,6 +45,21 @@
             padding: 1.25rem;
             background: var(--primary-color);
             color: var(--white);
+            display: flex;
+            /* Make sidebar-header a flex container */
+            flex-direction: column;
+            /* Stack its children vertically */
+            gap: 0.5rem;
+            /* Add some space between children */
+        }
+
+        .sidebar-header-top {
+            display: flex;
+            /* Make this a flex container for h1 and input */
+            align-items: center;
+            /* Vertically align items */
+            justify-content: space-between;
+            /* Push h1 and input to ends */
         }
 
         .sidebar-header h1 {
@@ -183,13 +198,48 @@
             background: #e0eafc;
         }
 
-        .location-info h4 {
-            font-weight: 600;
+        .location-info {
+
+            display: flex;
+
+            align-items: flex-start;
+
+            gap: 1rem;
+
+            width: 100%;
+            /* Ensure it fills the container */
+
         }
 
+
+
+        .location-info h4 {
+
+            font-weight: 600;
+
+            flex: 1;
+            /* Let the name take up the available space */
+
+            overflow-wrap: break-word;
+
+        }
+
+
+
         .location-info p {
+
             font-size: 0.8rem;
+
             color: var(--dark-gray);
+
+            flex-basis: 40%;
+            /* Assign a fixed basis for details */
+
+            flex-shrink: 0;
+            /* Prevent it from shrinking */
+
+            overflow-wrap: break-word;
+
         }
 
         .location-actions,
@@ -267,7 +317,11 @@
 <body>
     <div id="sidebar">
         <div class="sidebar-header">
-            <h1>旅遊攻略</h1>
+            <div class="sidebar-header-top">
+                <h1>旅遊攻略</h1>
+                <input type="text" id="countryCodeInput" placeholder="國家代碼" value="jp"
+                    style="width: 80px; padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.2); color: var(--white); font-size: 0.9rem;">
+            </div>
             <p id="location-count">已收藏 0 個地點</p>
         </div>
 
@@ -284,11 +338,7 @@
 
             <button id="show-form-btn" class="btn">新增地點</button>
 
-            <div class="list-section" style="margin-top: 1.5rem;">
-                <h3>國家代碼 (例如: tw, jp)</h3>
-                <input type="text" id="countryCodeInput" placeholder="輸入國家代碼" value="jp"
-                    style="width: 100%; padding: 8px; margin-bottom: 1rem; border-radius: 4px;">
-            </div>
+
 
             <div id="add-form" style="display: none;">
                 <h3>新增地點</h3>
@@ -466,7 +516,7 @@
                     locEl.innerHTML = `
                         <div class="location-info">
                             <h4>${loc.name}</h4>
-                            <p>${loc.address}</p>
+                            <p>${loc.details || ''}</p>
                         </div>
                         <div class="location-actions">
                             <span class="edit-btn" data-id="${loc.id}">✏️</span>
@@ -516,8 +566,34 @@
                         popupAnchor: [0, -15]
                     });
 
-                    const marker = L.marker([loc.lat, loc.lon], { icon: customIcon, id: loc.id }).addTo(map);
-                    marker.bindPopup(`<b>${loc.name}</b><br>${loc.address}<br>${loc.details || ''}`);
+                    const marker = L.marker([loc.lat, loc.lon], {
+                        icon: customIcon,
+                        id: loc.id,
+                        draggable: false // Initially not draggable
+                    }).addTo(map);
+
+                    let dragTimer;
+                    marker.on('mousedown', () => {
+                        dragTimer = setTimeout(() => {
+                            marker.dragging.enable();
+                            map.getContainer().style.cursor = 'move';
+                        }, 200);
+                    });
+
+                    marker.on('mouseup', () => {
+                        clearTimeout(dragTimer);
+                        map.getContainer().style.cursor = '';
+                    });
+
+                    marker.on('dragend', async (event) => {
+                        marker.dragging.disable();
+                        map.getContainer().style.cursor = '';
+                        const newLatLng = event.target.getLatLng();
+                        await updateLocationByCoords(loc.id, newLatLng);
+                    });
+
+
+                    marker.bindPopup(`<b>${loc.name}</b><br>${loc.details || ''}`);
                     markers.push(marker);
                 });
             }
@@ -557,6 +633,39 @@
             }
 
             // --- Core Functionality ---
+            async function updateLocationByCoords(id, latLng) {
+                showStatus('正在更新座標與地址...');
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latLng.lat}&lon=${latLng.lng}&accept-language=zh-TW`);
+                    const data = await response.json();
+
+                    if (data && data.display_name) {
+                        const locIndex = locations.findIndex(l => l.id === id);
+                        if (locIndex > -1) {
+                            locations[locIndex].lat = latLng.lat;
+                            locations[locIndex].lon = latLng.lng;
+                            locations[locIndex].address = data.display_name;
+
+                            const marker = markers.find(m => m.options.id === id);
+                            if (marker) {
+                                marker.bindPopup(`<b>${locations[locIndex].name}</b><br>${locations[locIndex].details || ''}`);
+                            }
+
+                            saveData();
+                            renderLocations();
+                            showStatus('✓ 地點位置與地址已更新', 'success');
+                        }
+                    } else {
+                        showStatus('❌ 無法找到對應地址，地點未更新', 'error');
+                        renderMapMarkers(); // Revert marker position
+                    }
+                } catch (error) {
+                    console.error('Reverse geocoding error:', error);
+                    showStatus('❌ 地址更新失敗', 'error');
+                    renderMapMarkers(); // Revert marker position
+                }
+            }
+
             async function handleSave() {
                 if (editingLocationId !== null) {
                     await updateLocation(editingLocationId);

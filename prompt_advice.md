@@ -1,5 +1,5 @@
 # Prompt Advice
 
-- **Clear Action**: The request was a direct command to perform a data-modification-like action ("I want to change the icon for 'Restaurant' to 'fork'"), which is clear and actionable.
-- **Implicit vs. Explicit**: The request implies a change to the application's data. It's helpful to clarify if the change should be a permanent change in the code (for default data) or a one-time change for the user's current data. In this case, I addressed both.
-- **Future Consideration**: For similar data-editing tasks, providing a simple UI for such customizations (like an icon picker for groups) within the app itself could be a great future feature.
+- **Detailed Bug Reports are Gold**: Providing the exact HTML snippet of the problematic element was the key to solving this. It allowed me to see the rendered output and understand that my previous assumptions were wrong. This is an excellent practice for reporting UI bugs.
+- **Persistence is Key**: Your persistence in reporting that the bug was not fixed was crucial. It forced me to re-evaluate my solution and find the true root cause of the layout issue.
+- **Visuals + Code = Clarity**: Combining a screenshot with the corresponding HTML snippet is the most effective way to communicate a front-end bug.
