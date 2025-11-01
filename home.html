@@ -415,10 +415,11 @@
 
                 // Define default groups with icons and colors
                 const defaultGroups = [
-                    { name: '餐廳', icon: '🍴', color: '#FF6347' },
-                    { name: '自然風景', icon: '🌳', color: '#3CB371' },
-                    { name: '咖啡廳', icon: '☕', color: '#8B4513' },
-                    { name: '旅遊景點', icon: '🏛️', color: '#4682B4' }
+                    { name: '餐廳', icon: '🍽️', color: '#FF6347' },
+                    { name: '屋台小吃', icon: '🍡', color: '#3CB371' },
+                    { name: 'vibe景點', icon: '⛩️', color: '#8B4513' },
+                    { name: '建築', icon: '🏛️', color: '#8B4513' },
+                    { name: '購物', icon: '🔖', color: '#4682B4' }
                 ];
 
                 if (loadedGroups.length === 0) {
@@ -456,6 +457,8 @@
                     }
                     return loc;
                 });
+
+
             }
 
             // --- UI Rendering ---
@@ -479,9 +482,9 @@
                     const groupEl = document.createElement('div');
                     groupEl.className = 'group-item';
                     groupEl.innerHTML = `
-                        <div style="display: flex; align-items: center;">
-                            <div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${group.color}; color: white; display: flex; justify-content: center; align-items: center; font-size: 14px; flex-shrink: 0;">${group.icon}</div>
-                            <span style="margin-left: 10px;">${group.name}</span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.2rem; width: 24px; text-align: center;">${group.icon}</span>
+                            <span>${group.name}</span>
                         </div>
                         <div class="group-actions">
                             <span class="group-count">${count}</span>
@@ -560,10 +563,10 @@
 
                     const customIcon = L.divIcon({
                         className: 'custom-marker',
-                        html: `<div style="background-color: ${markerColor}; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 18px;">${markerIcon}</div>`,
+                        html: `<div style="font-size: 28px; text-shadow: 0 0 3px #fff;">${markerIcon}</div>`,
                         iconSize: [30, 30],
-                        iconAnchor: [15, 15],
-                        popupAnchor: [0, -15]
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
                     });
 
                     const marker = L.marker([loc.lat, loc.lon], {

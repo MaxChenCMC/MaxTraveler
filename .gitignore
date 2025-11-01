@@ -1,4 +1,2 @@
-# 訴求：OpenStreetMap + Nominatim (地址搜尋)
-# Leaflet 作為地圖引擎(免費開源)
-# Nominatim API 提供地址轉座標服務(免費)
-# 這樣就能像 Google Maps 一樣輸入地址!
+*
+!home.html
