@@ -280,56 +280,414 @@
         }
 
         #status.success {
+
             color: #2e7d32;
+
+        }
+
+
+
+        /* --- Photo Carousel --- */
+
+
+
+        .photo-carousel {
+            position: fixed;
+            bottom: 20px;
+            /* Biased towards bottom, not not touching */
+            left: 50%;
+            transform: translateX(-50%);
+            /* Center horizontally */
+            width: 1000px;
+            /* 70vw at 1920px */
+            height: 500px;
+            /* 50vh at 1080px */
+            background-color: transparent;
+            /* No black background */
+            z-index: 1002;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.4), 0 12px 40px 0 rgba(0, 0, 0, 0.38);
+            /* More prominent shadow */
+        }
+
+        .carousel-content {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            /* Take full width of parent */
+            height: 100%;
+            /* Take full height of parent */
+            padding: 0;
+            /* Remove padding, let image fill */
+            background-color: transparent;
+            /* No black background */
+        }
+
+        .carousel-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            /* Shadow on image itself */
+            border-radius: 8px;
+            /* Subtle rounding on image */
+        }
+
+
+
+
+
+
+
+        .carousel-counter {
+
+
+
+            position: absolute;
+
+
+
+            top: 10px;
+
+
+
+            left: 50%;
+
+
+
+            transform: translateX(-50%);
+
+
+
+            color: white;
+
+
+
+            background-color: rgba(0, 0, 0, 0.5);
+
+
+
+            padding: 2px 8px;
+
+
+
+            border-radius: 10px;
+
+
+
+            font-size: 0.9rem;
+
+
+
+        }
+
+
+
+
+
+
+
+        .carousel-close {
+
+
+
+
+
+
+
+            position: absolute;
+
+
+
+
+
+
+
+            top: 10px;
+
+
+
+
+
+
+
+            right: 20px;
+
+
+
+
+
+
+
+            color: #f1f1f1;
+
+
+
+
+
+
+
+            font-size: 30px;
+
+
+
+
+
+
+
+            font-weight: bold;
+
+
+
+
+
+
+
+            transition: 0.3s;
+
+
+
+
+
+
+
+            cursor: pointer;
+
+
+
+
+
+
+
+            z-index: 1005;
+            /* Higher than navigation buttons */
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+        .carousel-close:hover,
+
+
+
+        .carousel-close:focus {
+
+
+
+            color: #bbb;
+
+
+
+        }
+
+
+
+
+
+
+
+        .carousel-prev,
+
+
+
+        .carousel-next {
+
+
+
+            cursor: pointer;
+
+
+
+            padding: 16px;
+
+
+
+            color: white;
+
+
+
+            font-weight: bold;
+
+
+
+            font-size: 20px;
+
+
+
+            transition: 0.6s ease;
+
+
+
+            user-select: none;
+
+
+
+            z-index: 1004;
+            /* Ensure buttons are clickable */
+
+
+
+        }
+
+
+
+
+
+
+
+        .carousel-prev:hover,
+
+
+
+        .carousel-next:hover {
+
+
+
+            background-color: rgba(255, 255, 255, 0.2);
+
+
+
         }
     </style>
+
+
+
 </head>
 
+
+
 <body>
+
     <div id="sidebar">
+
         <div class="sidebar-header">
+
             <div class="sidebar-header-top">
+
                 <h1>旅遊攻略</h1>
+
                 <input type="text" id="countryCodeInput" placeholder="國家代碼" value="jp"
                     style="width: 80px; padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.2); color: var(--white); font-size: 0.9rem;">
+
             </div>
+
             <p id="location-count">已收藏 0 個地點</p>
+
         </div>
 
+
+
         <div class="sidebar-content">
+
             <div class="list-section">
+
                 <h3>
+
                     <span>群組</span>
+
                     <span id="add-group-btn" class="add-group-btn">+ 新增群組</span>
+
                 </h3>
+
                 <div id="groups-container"></div>
+
             </div>
 
 
 
             <button id="show-form-btn" class="btn">新增地點</button>
 
+
+
             <div id="add-form" style="display: none;">
+
                 <h3>新增地點</h3>
+
                 <input type="text" id="nameInput" placeholder="地點名稱 (可選)">
+
                 <input type="text" id="addressInput" placeholder="輸入地址，例如：台北101" required>
+
                 <select id="groupSelect"></select>
+
                 <textarea id="detailsInput" placeholder="地點細節 (最多256字)" maxlength="256"></textarea>
+
+                <label for="photoInput"
+                    style="font-size: 0.9rem; color: var(--dark-gray); margin-top: 10px; display: block;">上傳照片:</label>
+
+                <input type="file" id="photoInput" accept="image/*" multiple style="margin-bottom: 10px;">
+
                 <div class="form-buttons">
+
                     <button id="saveBtn">儲存</button>
+
                     <button id="cancelBtn">取消</button>
+
                 </div>
+
             </div>
+
+
 
             <div class="list-section" style="margin-top: 1.5rem;">
+
                 <h3>所有地點</h3>
+
                 <div id="locations-container"></div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <div id="map-container"></div>
+
     <div id="status"></div>
+
+
+
+    <div id="photo-carousel" class="photo-carousel" style="display: none;">
+
+        <span class="carousel-close">&times;</span>
+
+        <div class="carousel-content">
+
+            <a class="carousel-prev">&#10094;</a>
+
+            <div class="carousel-slide">
+
+                <img id="carousel-image">
+
+                <div id="carousel-counter" class="carousel-counter"></div>
+
+            </div>
+
+            <a class="carousel-next">&#10095;</a>
+
+        </div>
+
+    </div>
+
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script>
@@ -359,8 +717,89 @@
             let markers = [];
             let activeLocationId = null;
             let editingLocationId = null;
+            let currentCarouselPhotos = [];
+            let currentCarouselIndex = 0;
+
+            // --- Carousel Logic ---
+            function showPhotoCarousel(locationId) {
+                const loc = locations.find(l => l.id === locationId);
+                if (!loc || !loc.photos || loc.photos.length === 0) {
+                    // If no photos, just open the regular popup
+                    const marker = markers.find(m => m.options.id === locationId);
+                    if (marker) marker.openPopup();
+                    return;
+                }
+
+                currentCarouselPhotos = loc.photos;
+                currentCarouselIndex = 0;
+                document.getElementById('photo-carousel').style.display = 'block';
+                document.addEventListener('keydown', handleCarouselKeys);
+                showSlide(currentCarouselIndex);
+                updateCarouselNavButtons(); // Initial button state
+            }
+
+            function closeCarousel() {
+                console.log('Close button clicked!'); // Debugging line
+                document.getElementById('photo-carousel').style.display = 'none';
+                document.removeEventListener('keydown', handleCarouselKeys);
+                currentCarouselPhotos = [];
+            }
+
+            function plusSlides(n) {
+                let newIndex = currentCarouselIndex + n;
+                if (newIndex >= currentCarouselPhotos.length) {
+                    newIndex = currentCarouselPhotos.length - 1; // Stop at last
+                }
+                if (newIndex < 0) {
+                    newIndex = 0; // Stop at first
+                }
+                if (newIndex !== currentCarouselIndex) { // Only update if index changed
+                    currentCarouselIndex = newIndex;
+                    showSlide(currentCarouselIndex);
+                }
+                updateCarouselNavButtons();
+            }
+
+            function updateCarouselNavButtons() {
+                const prevBtn = document.querySelector('.carousel-prev');
+                const nextBtn = document.querySelector('.carousel-next');
+                if (currentCarouselPhotos.length <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = (currentCarouselIndex === 0) ? 'none' : 'block';
+                    nextBtn.style.display = (currentCarouselIndex === currentCarouselPhotos.length - 1) ? 'none' : 'block';
+                }
+            }
+
+            function showSlide(n) {
+                document.getElementById('carousel-image').src = currentCarouselPhotos[n];
+                document.getElementById('carousel-counter').textContent = `${n + 1} / ${currentCarouselPhotos.length}`;
+                updateCarouselNavButtons(); // Update button state after slide change
+            }
+
+            function handleCarouselKeys(e) {
+                if (e.key === 'ArrowLeft') {
+                    plusSlides(-1);
+                } else if (e.key === 'ArrowRight') {
+                    plusSlides(1);
+                } else if (e.key === 'Escape') {
+                    closeCarousel();
+                }
+            }
+
+
 
             // --- Utility Functions ---
+            function readAsDataURL(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
             function cleanAddress(address) {
                 // Remove content within parentheses
                 let cleaned = address.replace(/\([^)]*\)/g, '').trim();
@@ -562,6 +1001,10 @@
                         await updateLocationByCoords(loc.id, newLatLng);
                     });
 
+                    marker.on('click', () => {
+                        showPhotoCarousel(loc.id);
+                    });
+
 
                     marker.bindPopup(`<b>${loc.name}</b><br>${loc.details || ''}`);
                     markers.push(marker);
@@ -581,6 +1024,7 @@
                 addressInput.value = '';
                 addressInput.disabled = false;
                 detailsInput.value = '';
+                document.getElementById('photoInput').value = '';
             }
 
             function startEdit(id) {
@@ -653,12 +1097,22 @@
                 const newName = nameInput.value.trim();
                 const newGroup = groupSelect.value;
                 const newDetails = detailsInput.value.trim();
+                const photoFiles = Array.from(document.getElementById('photoInput').files).slice(0, 20); // Limit to 20 files
+                let photoDataArray = originalLocation.photos || []; // Keep old photos by default
+
+                if (photoFiles.length > 0) { // If new files are selected, replace old ones
+                    photoDataArray = [];
+                    for (const file of photoFiles) {
+                        photoDataArray.push(await readAsDataURL(file));
+                    }
+                }
 
                 // If address hasn't changed, simple update and exit
                 if (newAddress === originalLocation.address) {
                     locations[locIndex].name = newName || '未命名地點';
                     locations[locIndex].group = newGroup;
                     locations[locIndex].details = newDetails;
+                    locations[locIndex].photos = photoDataArray; // Update photos
                     saveData();
                     renderUI();
                     resetFormState();
@@ -700,6 +1154,7 @@
                         locations[locIndex].lon = parseFloat(result.lon);
                         locations[locIndex].group = newGroup;
                         locations[locIndex].details = newDetails;
+                        locations[locIndex].photos = photoDataArray; // Update photos
 
                         saveData();
                         renderUI();
@@ -749,6 +1204,12 @@
 
                     if (data.length > 0) {
                         const result = data[0];
+                        const photoFiles = Array.from(document.getElementById('photoInput').files).slice(0, 20); // Limit to 20 files
+                        const photoDataArray = [];
+                        for (const file of photoFiles) {
+                            photoDataArray.push(await readAsDataURL(file));
+                        }
+
                         const newLocation = {
                             id: Date.now(),
                             name: nameInput.value.trim() || result.display_name.split(',')[0],
@@ -756,7 +1217,8 @@
                             lat: parseFloat(result.lat),
                             lon: parseFloat(result.lon),
                             group: groupSelect.value,
-                            details: detailsInput.value.trim()
+                            details: detailsInput.value.trim(),
+                            photos: photoDataArray // Store as an array
                         };
 
                         locations.unshift(newLocation);
@@ -859,6 +1321,10 @@
             }
 
             // --- Event Listeners ---
+            document.querySelector('.carousel-close').addEventListener('click', closeCarousel);
+            document.querySelector('.carousel-prev').addEventListener('click', () => plusSlides(-1));
+            document.querySelector('.carousel-next').addEventListener('click', () => plusSlides(1));
+
             showFormBtn.addEventListener('click', () => {
                 resetFormState();
                 addForm.style.display = 'block';
