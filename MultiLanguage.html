@@ -177,7 +177,7 @@
     </div>
     <div id="japanese-tab" class="tab-content active">
         <div class="container">
-            <h2>🗣️日文例句語音(加符號可停頓)</h2>
+            <h2>日文例句語音(加符號可停頓)</h2>
 
             <textarea id="japaneseText" placeholder="輸入日文...">こんにちは、元気ですか</textarea>
 
@@ -200,8 +200,8 @@
     </div>
     <div id="korean-tab" class="tab-content">
         <div class="container">
-            <h2>🗣️韓文例句語音</h2>
-            <textarea id="koreanText" placeholder="輸入韓文...">안녕하세요, 잘 지내세요?</textarea>
+            <h2>韓文例句語音</h2>
+            <textarea id="koreanText" placeholder="輸入韓文...">Max의깃허브에가서'좋아요'누르고,팔로우하고,댓글을남겨주세요</textarea>
             <div class="control-row">
                 <button class="play-btn" onclick="speak()">🔊 播放</button>
                 <button class="speed-btn active" onclick="setSpeed(0.85, this)">慢</button>
@@ -210,10 +210,11 @@
             </div>
             <div class="preset-section">
                 <h2>📌 常用例句</h2>
-                <button class="preset-btn" onclick="speakPreset('안녕하세요')">👋 안녕하세요 (您好)</button>
-                <button class="preset-btn" onclick="speakPreset('감사합니다')">🙏 감사합니다 (謝謝)</button>
-                <button class="preset-btn" onclick="speakPreset('죄송합니다')">😔 죄송합니다 (對不起)</button>
-                <button class="preset-btn" onclick="speakPreset('사랑해요')">❤️ 사랑해요 (我愛您)</button>
+                <button class="preset-btn" onclick="speakPreset('이거얼마예요')">👋 이거얼마예요 (請問這個多少錢)</button>
+                <button class="preset-btn" onclick="speakPreset('아이스 아메리카노...한잔주세요')">❤️ 아이스아메리카노
+                    한잔주세요(麻煩給我一杯冰美式)</button>
+                <button class="preset-btn" onclick="speakPreset('라테한잔주세요')">🙏 라테한잔주세요 (請給我一杯拿鐵)</button>
+                <button class="preset-btn" onclick="speakPreset('카드결제가능한가요')">😔 카드결제가능한가요 (可以用信用卡付款嗎)</button>
                 <button class="preset-btn" onclick="speakPreset('어디예요?')">📍 어디예요? (在哪裡?)</button>
             </div>
         </div>
