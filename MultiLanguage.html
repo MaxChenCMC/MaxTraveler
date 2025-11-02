@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>旅遊例句多聽就會說</title>
+    <style>
+        body {
+            font-family: 'Yu Gothic', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            /* Changed to column to stack tabs and content */
+            justify-content: flex-start;
+            /* Align items to the start */
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            /* Remove padding from body */
+        }
+
+        #tab-container {
+            display: flex;
+            width: 100%;
+            max-width: 450px;
+            /* Match container width */
+            background: white;
+            border-radius: 15px 15px 0 0;
+            /* Rounded top corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+            /* Add margin to match original container position */
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 0;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #667eea;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            border-radius: 15px 15px 0 0;
+            /* Rounded top corners */
+        }
+
+        .tab-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .tab-button.active {
+            color: #764ba2;
+            border-bottom: 3px solid #764ba2;
+            background-color: #f8f8f8;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            padding: 25px;
+            border-radius: 0 0 15px 15px;
+            /* Rounded bottom corners */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .container {
+            background: white;
+            padding: 0;
+            /* Remove padding as it's now in tab-content */
+            border-radius: 0;
+            /* Remove border-radius as it's now in tab-content */
+            box-shadow: none;
+            /* Remove box-shadow as it's now in tab-content */
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin: 0 0 15px 0;
+            font-size: 22px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Yu Gothic', 'Meiryo', sans-serif;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 3px;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .speed-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 15px;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .speed-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .play-btn {
+            padding: 10px 25px;
+        }
+
+        .preset-section {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            background: #10b981;
+            padding: 8px 12px;
+            margin: 4px 0;
+            font-size: 14px;
+            width: 100%;
+            text-align: left;
+        }
+
+        .preset-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="tab-container">
+        <button class="tab-button active" data-tab="japanese-tab">にほんご</button>
+        <button class="tab-button" data-tab="korean-tab">한국어</button>
+    </div>
+    <div id="japanese-tab" class="tab-content active">
+        <div class="container">
+            <h2>🗣️日文例句語音(加符號可停頓)</h2>
+
+            <textarea id="japaneseText" placeholder="輸入日文...">こんにちは、元気ですか</textarea>
+
+            <div class="control-row">
+                <button class="play-btn" onclick="speak()">🔊 播放</button>
+                <button class="speed-btn active" onclick="setSpeed(0.85, this)">慢</button>
+                <button class="speed-btn" onclick="setSpeed(1, this)">中</button>
+                <button class="speed-btn" onclick="setSpeed(1.15, this)">快</button>
+            </div>
+            <div class="preset-section">
+                <h2>📌 常用例句</h2>
+                <button class="preset-btn" onclick="speakPreset('クレジットカードでお願いします、袋はいりません')">💳
+                    クレジットカードでお願いします、袋はいりません</button>
+                <button class="preset-btn" onclick="speakPreset('すみません、トイレはどこですか')">🚻 すみません、トイレはどこですか</button>
+                <button class="preset-btn" onclick="speakPreset('いただきます')">🍽️ いただきます</button>
+                <button class="preset-btn" onclick="speakPreset('ごちそうさまでした')">😋 ごちそうさまでした</button>
+                <button class="preset-btn" onclick="speakPreset('お会計お願いします')">💰 お会計お願いします</button>
+            </div>
+        </div>
+    </div>
+    <div id="korean-tab" class="tab-content">
+        <div class="container">
+            <h2>🗣️韓文例句語音</h2>
+            <textarea id="koreanText" placeholder="輸入韓文...">안녕하세요, 잘 지내세요?</textarea>
+            <div class="control-row">
+                <button class="play-btn" onclick="speak()">🔊 播放</button>
+                <button class="speed-btn active" onclick="setSpeed(0.85, this)">慢</button>
+                <button class="speed-btn" onclick="setSpeed(1, this)">中</button>
+                <button class="speed-btn" onclick="setSpeed(1.15, this)">快</button>
+            </div>
+            <div class="preset-section">
+                <h2>📌 常用例句</h2>
+                <button class="preset-btn" onclick="speakPreset('안녕하세요')">👋 안녕하세요 (您好)</button>
+                <button class="preset-btn" onclick="speakPreset('감사합니다')">🙏 감사합니다 (謝謝)</button>
+                <button class="preset-btn" onclick="speakPreset('죄송합니다')">😔 죄송합니다 (對不起)</button>
+                <button class="preset-btn" onclick="speakPreset('사랑해요')">❤️ 사랑해요 (我愛您)</button>
+                <button class="preset-btn" onclick="speakPreset('어디예요?')">📍 어디예요? (在哪裡?)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentRate = 0.85;
+        let activeLanguage = 'ja-JP'; // Default to Japanese
+
+        function setSpeed(rate, button) {
+            currentRate = rate;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            button.classList.add('active');
+        }
+
+        function speak() {
+            let text = '';
+            let lang = '';
+
+            if (activeLanguage === 'ja-JP') {
+                text = document.getElementById('japaneseText').value;
+                lang = 'ja-JP';
+            } else if (activeLanguage === 'ko-KR') {
+                text = document.getElementById('koreanText').value;
+                lang = 'ko-KR';
+            }
+
+            if (!text.trim()) {
+                alert('請輸入文字！');
+                return;
+            }
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = currentRate;
+            speechSynthesis.speak(utterance);
+        }
+
+        function speakPreset(text) {
+            let lang = '';
+            if (activeLanguage === 'ja-JP') {
+                lang = 'ja-JP';
+            } else if (activeLanguage === 'ko-KR') {
+                lang = 'ko-KR';
+            }
+
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = currentRate;
+            speechSynthesis.speak(utterance);
+        }
+
+        // Tab Switching Logic
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        function showTab(tabId) {
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[data-tab="${tabId}"]`).classList.add('active');
+
+            if (tabId === 'japanese-tab') {
+                activeLanguage = 'ja-JP';
+            } else if (tabId === 'korean-tab') {
+                activeLanguage = 'ko-KR';
+            }
+        }
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                showTab(button.dataset.tab);
+            });
+        });
+
+        // Show default tab on load
+        showTab('japanese-tab');
+
+        document.getElementById('japaneseText').addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                speak();
+            }
+        });
+
+        document.getElementById('koreanText').addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                speak();
+            }
+        });
+    </script>
+</body>
+
+</html>
