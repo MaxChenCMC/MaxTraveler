@@ -21,7 +21,7 @@ MaxTraveler 是一個輕量級的網頁應用程式，旨在幫助您輕鬆規�
 ## 效果展示
 [快來試試](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/home.html)
 [![Live Demo 影片封面](demo.png)](https://www.instagram.com/reel/DOOZ_cjEqNL/?utm_source=ig_web_copy_link)
-[#同場加映 常用旅遊例句練習說](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/MultiLanguage.html)
+[同場加映 常用旅遊例句練習說](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/MultiLanguage.html)
 
 
 ## 技術棧
