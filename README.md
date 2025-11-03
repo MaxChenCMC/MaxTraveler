@@ -17,12 +17,11 @@ MaxTraveler 是一個輕量級的網頁應用程式，旨在幫助您輕鬆規�
 2.  **編輯地點**：點擊地點列表中的鉛筆圖示，即可編輯地點資訊。
 3.  **瀏覽照片**：點擊地圖上的標記或地點列表中的項目，若有上傳照片，將會開啟圖片輪播器。
 4.  **管理群組**：您可以新增、編輯或刪除自訂群組。
-[![Live Demo 影片封面](demo.png)](https://www.instagram.com/reel/DOOZ_cjEqNL/?utm_source=ig_web_copy_link)
 
 ## 效果展示
 [快來試試](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/home.html)
-![MaxTraveler Demo](demo.png)
-[同場加映 常用旅遊例句練習說](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/MultiLanguage.html)
+[![Live Demo 影片封面](demo.png)](https://www.instagram.com/reel/DOOZ_cjEqNL/?utm_source=ig_web_copy_link)
+[#同場加映 常用旅遊例句練習說](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/MultiLanguage.html)
 
 
 ## 技術棧
