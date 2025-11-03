@@ -19,7 +19,10 @@ MaxTraveler 是一個輕量級的網頁應用程式，旨在幫助您輕鬆規�
 4.  **管理群組**：您可以新增、編輯或刪除自訂群組。
 
 ## 效果展示
+![快來試試](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/home.html)
+![MaxTraveler Demo](demo.png)
 
+![同場加映 常用旅遊例句練習說](https://rawcdn.githack.com/MaxChenCMC/MaxTraveler/main/MultiLanguage.html)
 ![MaxTraveler Demo](demo.png)
 
 ## 技術棧
